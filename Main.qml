@@ -1,24 +1,20 @@
-import QtQuick 2.0
+import QtQuick 2.15
 import SddmComponents 2.0
-import QtMultimedia 5.7
-
+import QtMultimediaQuick 6.0 // Updated for Qt6 multimedia
 import "components"
 
 Rectangle {
-    // Main Container
     id: container
 
-    LayoutMirroring.enabled: Qt.locale().textDirection == Qt.RightToLeft
+    LayoutMirroring.enabled: Qt.locale().textDirection === Qt.RightToLeft
     LayoutMirroring.childrenInherit: true
 
     property int sessionIndex: session.index
 
-    // Inherited from SDDMComponents
     TextConstants {
         id: textConstants
     }
 
-    // Set SDDM actions
     Connections {
         target: sddm
         function onLoginSucceeded() {
@@ -30,12 +26,10 @@ Rectangle {
         }
     }
 
-    // Set Font
     FontLoader {
         id: textFont; name: config.displayFont
     }
 
-    // Background Fill
     Rectangle {
         anchors.fill: parent
         color: "black"
@@ -45,7 +39,6 @@ Rectangle {
     Image {
         id: image1
         anchors.fill: parent
-        //source: config.background
         fillMode: Image.PreserveAspectCrop
     }
 
@@ -74,11 +67,10 @@ Rectangle {
         MouseArea {
             id: mouseArea1
             anchors.fill: parent;
-            //onPressed: {playlist1.shuffle(); playlist1.next();}
             onPressed: {
-                fader1.state = fader1.state == "off" ? "on" : "off" ;
-                if (config.autofocusInput == "true") {
-                    if (username_input_box.text == "")
+                fader1.state = fader1.state === "off" ? "on" : "off" ;
+                if (config.autofocusInput === "true") {
+                    if (username_input_box.text === "")
                         username_input_box.focus = true
                     else
                         password_input_box.focus = true
@@ -87,12 +79,13 @@ Rectangle {
         }
         Keys.onPressed: {
             fader1.state = "on";
-            if (username_input_box.text == "")
+            if (username_input_box.text === "")
                 username_input_box.focus = true
             else
                 password_input_box.focus = true
         }
     }
+
     WallpaperFader {
         id: fader1
         visible: true
@@ -122,9 +115,9 @@ Rectangle {
             enabled: false
             anchors.fill: parent;
             onPressed: {
-                fader1.state = fader1.state == "off" ? "on" : "off" ;
-                if (config.autofocusInput == "true") {
-                    if (username_input_box.text == "")
+                fader1.state = fader1.state === "off" ? "on" : "off" ;
+                if (config.autofocusInput === "true") {
+                    if (username_input_box.text === "")
                         username_input_box.focus = true
                     else
                         password_input_box.focus = true
@@ -137,7 +130,7 @@ Rectangle {
         }
         Keys.onPressed: {
             fader2.state = "on";
-            if (username_input_box.text == "")
+            if (username_input_box.text === "")
                 username_input_box.focus = true
             else
                 password_input_box.focus = true
@@ -156,19 +149,19 @@ Rectangle {
 
     property MediaPlayer currentPlayer: mediaplayer1
 
-    // Timer event to handle fade between videos
     Timer {
         interval: 1000;
         running: true; repeat: true
         onTriggered: {
-            if (currentPlayer.duration != -1 && currentPlayer.position > currentPlayer.duration - 10000) { // pre load the 2nd player
-                if (video2.opacity == 0) { // toogle opacity
+            if (currentPlayer.duration !== -1 && currentPlayer.position > currentPlayer.duration - 10000) {
+                if (video2.opacity === 0) {
                     mediaplayer2.play()
-                } else
+                } else {
                     mediaplayer1.play()
+                }
             }
-            if (currentPlayer.duration != -1 && currentPlayer.position > currentPlayer.duration - 3000) { // initiate transition
-                if (video2.opacity == 0) { // toogle opacity
+            if (currentPlayer.duration !== -1 && currentPlayer.position > currentPlayer.duration - 3000) {
+                if (video2.opacity === 0) {
                     mouseArea1.enabled = false
                     currentPlayer = mediaplayer2
                     video2.opacity = 1
@@ -185,20 +178,17 @@ Rectangle {
         }
     }
 
-    Timer { // this timer waits for fade to stop and stops the video
+    Timer {
         id: triggerTimer
         interval: 4000; running: false; repeat: false
         onTriggered: {
-            if (video2.opacity == 1)
+            if (video2.opacity === 1)
                 mediaplayer1.stop()
             else
                 mediaplayer2.stop()
         }
     }
 
-
-
-    // Clock and Login Area
     Rectangle {
         id: rectangle
         anchors.fill: parent
@@ -220,7 +210,7 @@ Rectangle {
                 id: time
                 anchors.horizontalCenter: parent.horizontalCenter
                 color: clock.color
-                text : Qt.formatTime(clock.dateTime, config.timeFormat || "hh:mm")
+                text: Qt.formatTime(clock.dateTime, config.timeFormat || "hh:mm")
                 font.pointSize: config.clockFontSize
                 font.family: textFont.name
                 font.bold: true
@@ -230,13 +220,12 @@ Rectangle {
                 id: date
                 anchors.horizontalCenter: parent.horizontalCenter
                 color: clock.color
-                text : Qt.formatDate(clock.dateTime, config.dateFormat || "dddd, dd MMMM yyyy")
+                text: Qt.formatDate(clock.dateTime, config.dateFormat || "dddd, dd MMMM yyyy")
                 font.family: textFont.name
                 font.pointSize: config.dateFontSize
                 font.bold: true
             }
         }
-
 
         Rectangle {
             id: login_container
@@ -265,7 +254,6 @@ Rectangle {
                     font.family: textFont.name
                     font.bold: true
                     font.pixelSize: config.labelFontSize
-                    font.bold: true
                     color: config.labelFontColor
                     text: "Username"
                     anchors.verticalCenter: parent.verticalCenter
@@ -283,303 +271,9 @@ Rectangle {
                     font: textFont.name
                     color: "#25000000"
                     borderColor: "transparent"
-                    textColor: config.labelFontColor
-
-                    Keys.onPressed: {
-                        if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                            sddm.login(username_input_box.text, password_input_box.text, session.index)
-                            event.accepted = true
-                        }
-                    }
-
-                    KeyNavigation.backtab: password_input_box
-                    KeyNavigation.tab: password_input_box
-                }
-            }
-
-            Rectangle {
-                id: password_row
-                y: username_row.height + 10
-                height: parent.height * 0.36
-                color: "transparent"
-                anchors.right: parent.right
-                anchors.rightMargin: 0
-                anchors.left: parent.left
-                anchors.leftMargin: 0
-
-                Text {
-                    id: password_label
-                    width: parent.width * 0.27
-                    text: textConstants.password
-                    anchors.verticalCenter: parent.verticalCenter
-                    horizontalAlignment: Text.AlignLeft
-                    font.family: textFont.name
-                    font.bold: true
-                    font.pixelSize: config.labelFontSize
-                    color: config.labelFontColor
-                }
-
-                PasswordBox {
-                    id: password_input_box
-                    height: parent.height
-                    font: textFont.name
-                    color: "#25000000"
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.right: parent.right
-                    anchors.rightMargin: parent.height // this sets button width, this way its a square
-                    anchors.left: password_label.right
-                    anchors.leftMargin: config.passwordLeftMargin
-                    borderColor: "transparent"
-                    textColor: config.labelFontColor
-                    tooltipBG: "#25000000"
-                    tooltipFG: "#dc322f"
-                    image: "components/resources/warning_red.png"
-                    onTextChanged: {
-                        if (password_input_box.text == "") {
-                            clear_passwd_button.visible = false
-                        }
-                        if (password_input_box.text != "" && config.showClearPasswordButton != "false") {
-                            clear_passwd_button.visible = true
-                        }
-                    }
-
-                    Keys.onPressed: {
-                        if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                            sddm.login(username_input_box.text, password_input_box.text, session.index)
-                            event.accepted = true
-                        }
-                    }
-
-                    KeyNavigation.backtab: username_input_box
-                    KeyNavigation.tab: login_button
-                }
-
-                Button {
-                    id: clear_passwd_button
-                    height: parent.height
-                    width: parent.height
-                    color: "transparent"
-                    text: "x"
-                    textColor: config.labelFontColor
-                    font: textFont.name
-
-                    border.color: "transparent"
-                    border.width: 0
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.right: parent.right
-                    anchors.leftMargin: 0
-                    anchors.rightMargin: parent.height
-
-                    disabledColor: "#dc322f"
-                    activeColor: "#393939"
-                    pressedColor: "#2aa198"
-
-                    onClicked: {
-                        password_input_box.text=''
-                        password_input_box.focus = true
-                    }
-                }
-
-                Button {
-                    id: login_button
-                    height: parent.height
-                    color: "#393939"
-                    text: ">"
-                    border.color: "#00000000"
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.left: password_input_box.right
-                    anchors.right: parent.right
-                    disabledColor: "#dc322f"
-                    activeColor: "#268bd2"
-                    pressedColor: "#2aa198"
-                    textColor: config.labelFontColor
-                    font: textFont.name
-
-                    onClicked: sddm.login(username_input_box.text, password_input_box.text, session.index)
-
-                    KeyNavigation.backtab: password_input_box
-                    KeyNavigation.tab: reboot_button
-                }
-
-                Text {
-                    id: error_message
-                    height: parent.height
-                    font.family: textFont.name
-                    font.pixelSize: config.errorMsgFontSize
-                    font.bold: true
-                    //color: "white"
-                    anchors.top: password_input_box.bottom
-                    anchors.left: password_input_box.left
-                    anchors.leftMargin: 0
-                }
-            }
-
-        }
-    }
-
-    // Top Bar
-    Rectangle {
-        id: actionBar
-        width: parent.width
-        height: parent.height * 0.04
-        anchors.top: parent.top;
-        anchors.horizontalCenter: parent.horizontalCenter
-        color: "transparent"
-        visible: config.showTopBar != "false"
-
-        Row {
-            id: row_left
-            anchors.left: parent.left
-            anchors.margins: 5
-            height: parent.height
-            spacing: 10
-
-            ComboBox {
-                id: session
-                width: 145
-                height: 20
-                anchors.verticalCenter: parent.verticalCenter
-                color: "transparent"
-                arrowColor: "transparent"
-                textColor: config.actionBarFontColor
-                borderColor: "transparent"
-                hoverColor: "#5692c4"
-                font.family: textFont.name
-                font.pixelSize: config.actionBarFontSize
-                font.bold: true
-
-                model: sessionModel
-                index: sessionModel.lastIndex
-
-                KeyNavigation.backtab: shutdown_button
-                KeyNavigation.tab: password_input_box
-            }
-
-            ComboBox {
-                id: language
-
-                model: keyboard.layouts
-                index: keyboard.currentLayout
-                width: 50
-                height: 20
-                anchors.verticalCenter: parent.verticalCenter
-                color: "transparent"
-                arrowColor: "transparent"
-                //textColor: "white"
-                borderColor: "transparent"
-                hoverColor: "#5692c4"
-
-                onValueChanged: keyboard.currentLayout = id
-
-                Connections {
-                    target: keyboard
-
-                    function onCurrentLayoutChanged() {
-                        combo.index = keyboard.currentLayout
-                    }
-                }
-
-                rowDelegate: Rectangle {
-                    color: "transparent"
-
-                    Text {
-                        anchors.margins: 4
-                        anchors.top: parent.top
-                        anchors.bottom: parent.bottom
-
-                        verticalAlignment: Text.AlignVCenter
-
-                        text: modelItem ? modelItem.modelData.shortName : "zz"
-                        font.family: textFont.name
-                        font.pixelSize: config.actionBarFontSize
-                        font.bold: true
-                        color: config.actionBarFontColor
-                    }
-                }
-                KeyNavigation.backtab: session
-                KeyNavigation.tab: username_input_box
-            }
-        }
-
-        Row {
-            id: row_right
-            height: parent.height
-            anchors.right: parent.right
-            anchors.margins: 5
-            spacing: 10
-
-            ImageButton {
-                id: reboot_button
-                height: parent.height
-                source: "components/resources/reboot.svg"
-
-                visible: sddm.canReboot
-                onClicked: sddm.reboot()
-                KeyNavigation.backtab: login_button
-                KeyNavigation.tab: shutdown_button
-            }
-
-            ImageButton {
-                id: shutdown_button
-                height: parent.height
-                source: "components/resources/shutdown.svg"
-                visible: sddm.canPowerOff
-                onClicked: sddm.powerOff()
-                KeyNavigation.backtab: reboot_button
-                KeyNavigation.tab: session
-            }
-        }
-    }
-
-    Component.onCompleted: {
-        // Set Focus
-        /* if (username_input_box.text == "") */
-        /*     username_input_box.focus = true */
-        /* else */
-        /*     password_input_box.focus = true */
-
-        video1.focus = true
-
-        // load and randomize playlist
-        var time = parseInt(new Date().toLocaleTimeString(Qt.locale(),'h'))
-        if ( time >= config.dayTimeStart && time <= config.dayTimeEnd ) {
-            playlist1.load(Qt.resolvedUrl(config.bgVidDay), 'm3u')
-            playlist2.load(Qt.resolvedUrl(config.bgVidDay), 'm3u')
-            //image1.source = config.bgImgDay
-            if ( config.bgImgDay !== null ) {
-                //image1.source = config.bgImgDay
-                var fileType = config.bgImgDay.substring(config.bgImgDay.lastIndexOf(".") + 1)
-                //console.log(fileType)
-                if (fileType === "gif") {
-                        animatedGIF1.source = config.bgImgDay
-                } else {
-                        image1.source = config.bgImgDay
-                }
-            }
-        } else {
-            playlist1.load(Qt.resolvedUrl(config.bgVidNight), 'm3u')
-            playlist2.load(Qt.resolvedUrl(config.bgVidNight), 'm3u')
-            if ( config.bgImgNight !== null ) {
-                var fileType = config.bgImgNight.substring(config.bgImgNight.lastIndexOf(".") + 1)
-                //console.log(fileType)
-                if (fileType === "gif") {
-                        animatedGIF1.source = config.bgImgNight
-                } else {
-                        image1.source = config.bgImgNight
+                    focus: true
                 }
             }
         }
-
-        for (var k = 0; k < Math.ceil(Math.random() * 10) ; k++) {
-            playlist1.shuffle()
-            playlist2.shuffle()
-        }
-
-        if (config.showLoginButton == "false") {
-            login_button.visible = false
-            password_input_box.anchors.rightMargin = 0
-            clear_passwd_button.anchors.rightMargin = 0
-        }
-        clear_passwd_button.visible = false
     }
 }
