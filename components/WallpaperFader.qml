@@ -17,10 +17,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 
-import QtQuick 2.6
-import QtQuick.Controls 1.1
-import QtQuick.Layouts 1.1
-import QtGraphicalEffects 1.0
+import QtQuick 6.2
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
+import QtQuick.Shapes 1.15  // Use Shapes instead of QtGraphicalEffects in Qt6
 
 Item {
     id: wallpaperFader
@@ -38,11 +38,13 @@ Item {
             easing.type: Easing.InOutQuad
         }
     }
+
     FastBlur {
         id: wallpaperBlur
         anchors.fill: parent
         radius: 50 * wallpaperFader.factor
     }
+
     ShaderEffect {
         id: wallpaperShader
         anchors.fill: parent
@@ -72,7 +74,6 @@ Item {
                     0,         0,         intensity, 0,
                     0,         0,         0,         1
                 ));
-    
 
         fragmentShader: "
             uniform mediump mat4 colorMatrix;
@@ -119,11 +120,11 @@ Item {
             }
         }
     ]
+
     transitions: [
         Transition {
             from: "off"
             to: "on"
-            //Note: can't use animators as they don't play well with parallelanimations
             ParallelAnimation {
                 NumberAnimation {
                     target: mainStack
